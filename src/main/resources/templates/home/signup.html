@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Welcome to the Jungle</title>
+</head>
+<body>
+
+
+
+<form method="post" action="/signup">
+
+{{#errorMessage}}
+	<div>{{ errorMessage }}</div>
+{{/errorMessage}}
+
+	<input type="text" name="username" required placeholder="username">
+	<br>
+	<input type="password" name="password" required placeholder="password">
+	<br>
+	<input type="hidden" name="{{ _csrf.parameterName }}" value="{{ _csrf.token }}">
+	<button>Sign up!</button>
+</form>
+</body>
+</html>

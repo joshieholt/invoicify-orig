@@ -6,32 +6,42 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+
+import com.libertymutual.goforcode.invoicify.services.InvoicifyUserDetailService;
 
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-    
+
+    private InvoicifyUserDetailService userDetailsService;
+
+    public SecurityConfiguration(InvoicifyUserDetailService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-            .authorizeRequests()
-                .antMatchers("/", "/loginalot", "/css/**", "/js/**").permitAll()
+        http.authorizeRequests()
+                .antMatchers("/", "/loginalot", "/signup", "/css/**", "/js/**").permitAll()
                 .antMatchers("/admin").hasRole("ADMIN")
                 .antMatchers("/invoices/**").hasAnyRole("ADMIN", "ACCOUNTANT")
                 .antMatchers("/billing-records/**").hasAnyRole("ADMIN", "CLERK")
                 .anyRequest().authenticated()
-                .and()
+            .and()
             .formLogin()
                 .loginPage("/loginalot");
     }
     
     @Bean
-    public UserDetailsService userDetailsService() {
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        manager.createUser(User.withUsername("admin").password("admin").roles("ADMIN").build());
-        manager.createUser(User.withUsername("clerk").password("clerk").roles("CLERK").build());
-        manager.createUser(User.withUsername("accountant").password("accountant").roles("ACCOUNTANT").build());
-        return manager;
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
-    
+
+    @Override
+    public UserDetailsService userDetailsService() {
+        return userDetailsService;
+    }
+
 }
